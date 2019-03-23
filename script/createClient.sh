@@ -72,15 +72,15 @@ verb 4
 mute 20
 
 # Enable compression on the VPN link.
-comp-lzo yes
+compress lz4-v2
 
 
 #Allow calling of built-in executables and user-defined scripts.
 script-security 2
 
 #script update DNS(/etc/resolv.conf)
-up /etc/openvpn/update-resolv-conf
-down /etc/openvpn/update-resolv-conf
+up /etc/openvpn/update-systemd-resolved
+down /etc/openvpn/update-systemd-resolved
 END_OF_CLIENT_CONF
 
 tar --auto-compress --create --directory "${OPEN_VPN_DIR}" --file "${CURRENT_DIR}/${CLIENT_NAME}.tar.gz" "${RELATIVE_CLIENT_CONF}" "${RELATIVE_CLIENT_CRT}" "${RELATIVE_CLIENT_KEY}" "${RELATIVE_CA_CRT}" "${RELATIVE_TSL_SECRET}" 
