@@ -35,6 +35,7 @@ A very important variable is KEY_CONFIG, which, by default is set by calling a l
 export KEY_CONFIG="$EASY_RSA/openssl-1.0.0.cnf"
 ...
 END_OF_WRONG_KEY_CONFIG
+    exit 1
 fi
 ./clean-all
 ./build-ca
