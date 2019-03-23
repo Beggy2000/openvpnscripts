@@ -41,7 +41,9 @@ fi
 ./build-key-server "${SERVER_NAME}"
 ./build-dh
 openvpn --genkey --secret "${TSL_SECRET}"
-touch "${IFCONFIG_POOL}"
+
+touch "${IFCONFIG_POOL}" #just create the ipp.txt file
+
 declare -r OPENVPN_NET_0="$(echo "${OPENVPN_NET}" | sed 's|/.*$||g')"
 
 cat - > "${SERVER_CONF}" <<END_OF_SERVER_CONFIG
@@ -50,6 +52,7 @@ mode server
 port 1194
 # TCP or UDP server?
 proto tcp
+explicit-exit-notify 0 #is only used by UDP
 
 # "dev tun" will create a routed IP tunnel
 dev tun 
@@ -70,8 +73,8 @@ tls-server
 # a copy of this key.
 tls-auth ${TSL_SECRET} 0
 tls-timeout 120
-auth SHA1
-cipher BF-CBC
+auth SHA256
+cipher AES-256-CBC
 
 # Configure server mode and supply a VPN subnet
 server ${OPENVPN_NET_0} 255.255.255.0
@@ -126,9 +129,17 @@ client-to-client
 # on client machines to pass through the OpenVPN server
 push "redirect-gateway def1"
 
-END_OF_SERVER_CONFIG
-sed -n 's|^nameserver \(.*\)$|push "dhcp-option DNS \1"|gp' /etc/resolv.conf >> "${SERVER_CONF}"
+# Enable compression on the VPN link and push the
+# option to the client (v2.4+ only, for earlier
+# versions see below)
+compress lz4-v2
+push "compress lz4-v2"
 
+
+END_OF_SERVER_CONFIG
+sed -n 's|^nameserver \(.*\)$|push "dhcp-option DNS \1"|gp' /etc/resolv.conf >> "${SERVER_CONF}" #add DNSes
+
+#fix sysctl
 sed -i "s|^[[:space:]]*#[[:space:]]*net\.ipv4\.ip_forward=1|net.ipv4.ip_forward=1|g" "/etc/sysctl.conf"
 if ! grep --quiet "^net\.ipv4\.ip_forward=1" "/etc/sysctl.conf" ; then
     echo "net.ipv4.ip_forward=1" >> "/etc/sysctl.conf"
