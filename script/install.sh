@@ -27,9 +27,7 @@ fi
 apt-get update
 apt-get -y install openvpn easy-rsa
 
-mkdir -pv "${EASY_RSA_DIR}"
-shopt -s extglob #to be sure we can use statement like !(vars)
-cp -asv "${ORIGIN_EASY_RSA_DIR}"/!(vars) "${EASY_RSA_DIR}/" #create symbolic link for all except vars
+make-cadir "${EASY_RSA_DIR}"
 cp -v "${ORIGIN_EASY_RSA_DIR}"/vars "${EASY_RSA_DIR}/"
 
 cat - <<END_OF_TEXT
