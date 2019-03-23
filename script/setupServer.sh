@@ -23,6 +23,19 @@ source ./environment.sh
 
 cd "${EASY_RSA_DIR}"
 source vars
+
+if [[ ! -r "${KEY_CONFIG}" ]] ; then
+    cat - <<END_OF_WRONG_KEY_CONFIG
+
+The KEY_CONFIG variable point to not existing file. Please correct the vars file.
+From https://linuxconfig.org/openvpn-setup-on-ubuntu-18-04-bionic-beaver-linux Step 2.1 - Variables setup: 
+...
+A very important variable is KEY_CONFIG, which, by default is set by calling a little wrapper script which should retrieve the right ssl configuration. However, if used this way it generates an error, because the script doesn't retrieve the configuration. To avoid this, we specify the configuration file directly:
+
+export KEY_CONFIG="$EASY_RSA/openssl-1.0.0.cnf"
+...
+END_OF_WRONG_KEY_CONFIG
+fi
 ./clean-all
 ./build-ca
 ./build-key-server "${SERVER_NAME}"
