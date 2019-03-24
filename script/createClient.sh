@@ -74,6 +74,11 @@ mute 20
 # Enable compression on the VPN link.
 compress lz4-v2
 
+#Encrypt data channel packets with cipher algorithm
+cipher AES-256-CBC
+
+#Authenticate data channel packets and (if enabled) tls-auth control channel packets
+auth SHA256
 
 #Allow calling of built-in executables and user-defined scripts.
 script-security 2
@@ -81,6 +86,10 @@ script-security 2
 #script update DNS(/etc/resolv.conf)
 up /etc/openvpn/update-systemd-resolved
 down /etc/openvpn/update-systemd-resolved
+down-pre
+
+# prevent DNS leakage (see: https://github.com/systemd/systemd/issues/6076#issuecomment-387332572)
+dhcp-option DOMAIN-ROUTE .
 END_OF_CLIENT_CONF
 
 tar --auto-compress --create --directory "${OPEN_VPN_DIR}" --file "${CURRENT_DIR}/${CLIENT_NAME}.tar.gz" "${RELATIVE_CLIENT_CONF}" "${RELATIVE_CLIENT_CRT}" "${RELATIVE_CLIENT_KEY}" "${RELATIVE_CA_CRT}" "${RELATIVE_TSL_SECRET}" 
