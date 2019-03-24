@@ -138,7 +138,11 @@ push "compress lz4-v2"
 
 
 END_OF_SERVER_CONFIG
-sed -n 's|^nameserver \(.*\)$|push "dhcp-option DNS \1"|gp' /etc/resolv.conf >> "${SERVER_CONF}" #add DNSes
+#add DNSes for resolve.conf:
+#sed -n 's|^nameserver \(.*\)$|push "dhcp-option DNS \1"|gp' /etc/resolv.conf >> "${SERVER_CONF}"
+
+#add DNSes for systemd-resolve:
+systemd-resolve --status --no-pager | sed -n '/^\s*DNS Servers:/,/^\s*DNS Domain:/p' | grep -v 'DNS Domain:' | sed -n 's|^.* \([0-9.]*\)$|push "dhcp-option DNS \1"|gp'  >> "${SERVER_CONF}"
 
 #fix sysctl
 sed -i "s|^[[:space:]]*#[[:space:]]*net\.ipv4\.ip_forward=1|net.ipv4.ip_forward=1|g" "/etc/sysctl.conf"
